@@ -1,0 +1,20 @@
+# 运行期数据：含访问 token、日志、浏览器登录态 Cookie
+# data/browser-profile 与 data/ui-profile 合计约 1 GB，绝对不能提交
+data/
+
+# 本地快捷方式（含绝对路径）
+*.lnk
+
+# 依赖（本项目零依赖，留作兜底）
+node_modules/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# 日志
+*.log
+npm-debug.log*

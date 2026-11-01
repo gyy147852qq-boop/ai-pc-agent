@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI 电脑代理</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<script>window.__TOKEN__ = "@@AGENT_TOKEN@@";</script>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">AI</div>
+    <div>
+      <h1>AI 电脑代理</h1>
+      <p class="sub">网页 AI 的大脑 + 你电脑的手脚</p>
+    </div>
+  </div>
+  <div class="topright">
+    <div class="pill" id="bridgePill"><i class="dot"></i><span id="bridgeText">桥接检测中</span></div>
+    <div class="pill status-pill" id="statusPill"><i class="dot"></i><span id="statusText">空闲</span></div>
+    <button class="btn ghost small quit" id="quitBtn" title="关闭软件">退出</button>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- 左：会话流 -->
+  <section class="stream-wrap">
+    <div class="stream-head">
+      <span>执行过程</span>
+      <span class="muted" id="roundInfo"></span>
+    </div>
+    <div class="stream" id="stream">
+      <div class="empty" id="empty">
+        <div class="empty-icon">⌘</div>
+        <h3>还没开始</h3>
+        <p>在右边写下你要电脑做的事，点「开始」。<br/>AI 会一步步给出 PowerShell 命令，软件执行后把结果回传给 AI。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 右：控制台 -->
+  <aside class="side">
+    <div class="card">
+      <label class="card-label">要电脑做什么</label>
+      <textarea id="goal" rows="4" placeholder="例：帮我把桌面上所有 png 图片按日期分到子文件夹里&#10;例：看看 C 盘还剩多少空间，哪些文件夹最占地方"></textarea>
+      <div class="btn-row">
+        <button class="btn primary" id="startBtn">开始</button>
+        <button class="btn ghost" id="stopBtn" disabled>停止</button>
+      </div>
+      <p class="hint">说的越具体，AI 越不容易跑偏。</p>
+    </div>
+
+    <!-- 待确认命令 -->
+    <div class="card danger-card hidden" id="pendingCard">
+      <div class="card-label-row">
+        <span class="card-label">需要你确认</span>
+        <span class="tag" id="pendingLevel">写操作</span>
+      </div>
+      <p class="pending-why" id="pendingWhy"></p>
+      <pre class="code-view" id="pendingCode"></pre>
+      <div class="btn-row">
+        <button class="btn primary" id="allowBtn">允许执行</button>
+        <button class="btn danger-ghost" id="denyBtn">拒绝</button>
+      </div>
+    </div>
+
+    <!-- AI 提问 / 手动粘贴 -->
+    <div class="card ask-card hidden" id="askCard">
+      <div class="card-label">AI 在问你</div>
+      <p class="ask-text" id="askText"></p>
+      <textarea id="answerBox" rows="3" placeholder="回答它…"></textarea>
+      <div class="btn-row">
+        <button class="btn primary" id="answerBtn">回复</button>
+      </div>
+    </div>
+
+    <!-- 设置 -->
+    <div class="card">
+      <div class="card-label-row">
+        <span class="card-label">设置</span>
+        <span class="chev" id="setChev">收起</span>
+      </div>
+      <div id="settingsBody">
+        <div class="field">
+          <label>桥接方式</label>
+          <select id="bridgeMode">
+            <option value="userscript">油猴脚本（推荐）</option>
+            <option value="cdp">浏览器接管（自动操控）</option>
+            <option value="manual">手动复制粘贴</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>网页 AI 地址（浏览器接管时用）</label>
+          <input id="cdpUrl" type="text" />
+        </div>
+        <div class="field row">
+          <label class="switch-label">
+            <input type="checkbox" id="autoSafe" />
+            <span>只读命令自动执行</span>
+          </label>
+        </div>
+        <div class="field two">
+          <div>
+            <label>最大轮数</label>
+            <input id="maxRounds" type="number" min="1" max="80" />
+          </div>
+          <div>
+            <label>单条超时（秒）</label>
+            <input id="execTimeout" type="number" min="5" max="900" />
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn ghost" id="saveBtn">保存设置</button>
+          <button class="btn ghost" id="reconnectBtn">重连浏览器</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">接入步骤</div>
+      <button class="btn primary full" id="autoBtn">一键接管浏览器（不用装扩展）</button>
+      <p class="hint" id="autoNote">点一下会自动打开一个浏览器窗口，在里面登录一次 DeepSeek 就行。</p>
+      <ol class="steps" id="steps">
+        <li>装一个 Tampermonkey（油猴）浏览器扩展</li>
+        <li><a href="/bridge.user.js" target="_blank" id="installLink">点这里安装桥接脚本</a></li>
+        <li>打开 <a href="https://chat.deepseek.com" target="_blank" rel="noreferrer">chat.deepseek.com</a> 并登录</li>
+        <li>页面右下角出现「AI 代理：已连接」就能用了</li>
+      </ol>
+      <p class="hint" id="sysInfoBtnWrap"><a href="#" id="sysInfoBtn">看看软件读到的电脑状态</a></p>
+    </div>
+  </aside>
+</main>
+
+<div class="modal hidden" id="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">电脑状态</h3>
+      <button class="btn ghost small" id="modalClose">关闭</button>
+    </div>
+    <pre class="code-view" id="modalBody"></pre>
+  </div>
+</div>
+
+<div class="offline hidden" id="offline">
+  <div class="offline-box">
+    <div class="offline-icon">!</div>
+    <h3>连不上软件后端</h3>
+    <p id="offlineMsg">后台服务已经退出了，这个窗口现在是个空壳，点按钮不会有反应。</p>
+    <p class="offline-hint">重新启动：双击 <code>start.bat</code>，或桌面上的「AI 电脑代理」图标。</p>
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn primary" id="retryBtn">重新连接</button>
+      <button class="btn ghost" id="closeWinBtn">关闭这个窗口</button>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

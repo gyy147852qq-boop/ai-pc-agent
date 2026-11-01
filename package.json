@@ -1,0 +1,15 @@
+{
+  "name": "ai-pc-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "把网页端 AI 聊天机器人变成你 Windows 电脑的 Agent：软件把电脑状态和需求发过去，AI 回 PowerShell 命令，软件在本机执行并把结果回传。",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:noopen": "node server.js --no-open",
+    "test": "node test/selftest.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
