@@ -2,6 +2,8 @@
 
 把网页端 AI 聊天机器人（DeepSeek / ChatGPT / Kimi…）变成你 Windows 电脑的 Agent。
 
+> 🔗 https://github.com/gyy147852qq-boop/ai-pc-agent ｜ MIT License ｜ Node.js 22+，零第三方依赖
+
 你不用复制粘贴，它自己跑：
 
 ```
